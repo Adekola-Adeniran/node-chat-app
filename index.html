@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Node.js Chat App</title>
+</head>
+<body>
+  <h1>Real-Time Chat</h1>
+  <div id="users"></div>
+  <div id="chat"></div>
+  <input id="msgInput" placeholder="Type a message..." />
+  <button onclick="sendMessage()">Send</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io("http://localhost:3000");
+    
+    const username = prompt("Enter your username:");
+    socket.emit("join", username);
+
+    const usersDiv = document.getElementById("users");
+    const chatDiv = document.getElementById("chat");
+    const msgInput = document.getElementById("msgInput");
+
+    socket.on("updateUsers", (users) => {
+      usersDiv.innerHTML = "<strong>Online:</strong> " + users.join(", ");
+    });
+
+    socket.on("message", (data) => {
+      const msgEl = document.createElement("div");
+      msgEl.textContent = `${data.user}: ${data.text}`;
+      chatDiv.appendChild(msgEl);
+    });
+
+    function sendMessage() {
+      const msg = msgInput.value;
+      socket.emit("message", msg);
+      msgInput.value = "";
+    }
+  </script>
+</body>
+</html>
